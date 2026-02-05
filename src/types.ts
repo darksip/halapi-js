@@ -16,6 +16,7 @@ export interface Book {
   title: string
   author: string
   isbn?: string
+  isbn13?: string
   year?: number
   coverUrl?: string
   description?: string
@@ -327,5 +328,44 @@ export interface ApiErrorResponse {
   metadata: {
     requestId: string
     timestamp: string
+  }
+}
+
+// =============================================================================
+// Book Presentations API Types
+// =============================================================================
+
+/**
+ * Individual book presentation result
+ */
+export interface BookPresentation {
+  /** The ISBN-13 that was requested */
+  isbn13: string
+  /** The presentation text, or null if not found */
+  presentation: string | null
+  /** Whether the book was found */
+  found: boolean
+}
+
+/**
+ * Request body for POST /api/halap/books/presentations
+ */
+export interface BookPresentationsRequest {
+  /** Array of ISBN-13 strings (min: 1, max: 100) */
+  isbn13s: string[]
+}
+
+/**
+ * Response from POST /api/halap/books/presentations
+ */
+export interface BookPresentationsResponse {
+  success: boolean
+  presentations: BookPresentation[]
+  metadata: {
+    requestId: string
+    timestamp: string
+    requested: number
+    found: number
+    notFound: number
   }
 }

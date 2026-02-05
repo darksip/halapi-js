@@ -9,6 +9,7 @@ import type { ConfigProvider, HalapiConfig } from './config'
 import { isConfigValid } from './config'
 import type {
   BookArtifactsResponse,
+  BookPresentationsResponse,
   ConversationDetailResponse,
   ConversationsListResponse,
   MusicArtifactsResponse,
@@ -358,12 +359,46 @@ export function createHalapiClient(getConfig: ConfigProvider, options: HalapiCli
     return response.json() as Promise<MusicArtifactsResponse>
   }
 
+  /**
+   * Get presentations for multiple books by ISBN-13
+   *
+   * @param isbn13s - Array of ISBN-13 strings (1-100 items)
+   * @returns Book presentations with success/not-found status for each ISBN
+   */
+  async function getBookPresentations(isbn13s: string[]): Promise<BookPresentationsResponse> {
+    if (!isbn13s || isbn13s.length === 0) {
+      throw new HalapiError('At least one ISBN-13 is required')
+    }
+    if (isbn13s.length > 100) {
+      throw new HalapiError('Maximum 100 ISBN-13s allowed per request')
+    }
+
+    const config = await resolveConfig()
+    const headers = getAuthHeaders(config)
+
+    const response = await fetchFn(getApiUrl(config, '/api/halap/books/presentations'), {
+      method: 'POST',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ isbn13s }),
+    })
+
+    if (!response.ok) {
+      await handleErrorResponse(response, 'Failed to fetch book presentations')
+    }
+
+    return response.json() as Promise<BookPresentationsResponse>
+  }
+
   return {
     chatStream,
     getConversations,
     getConversation,
     getBookArtifacts,
     getMusicArtifacts,
+    getBookPresentations,
   }
 }
 

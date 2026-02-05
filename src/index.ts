@@ -65,6 +65,10 @@ export type {
   BookArtifactsResponse,
   MusicArtifactsResponse,
   ApiErrorResponse,
+  // Book presentations
+  BookPresentation,
+  BookPresentationsRequest,
+  BookPresentationsResponse,
 } from './types'
 
 // Utilities
