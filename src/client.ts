@@ -55,9 +55,32 @@ export class HalapiError extends Error {
 }
 
 /**
+ * Options for customizing the Halapi client behavior
+ */
+export interface HalapiClientOptions {
+  /**
+   * Custom fetch function for making HTTP requests.
+   * Use this to inject custom headers, interceptors, or use a different HTTP client.
+   *
+   * @example
+   * ```typescript
+   * const client = createHalapiClient(configProvider, {
+   *   customFetch: (input, init) => {
+   *     const headers = new Headers(init?.headers)
+   *     headers.set('X-Custom-Header', 'value')
+   *     return fetch(input, { ...init, headers })
+   *   }
+   * })
+   * ```
+   */
+  customFetch?: typeof fetch
+}
+
+/**
  * Creates a Halapi API client with the given configuration provider
  *
  * @param getConfig - Function that returns the API configuration
+ * @param options - Optional client configuration
  * @returns An object with methods to interact with the Halapi API
  *
  * @example
@@ -76,9 +99,19 @@ export class HalapiError extends Error {
  *     process.stdout.write(event.data.delta)
  *   }
  * }
+ *
+ * // Using custom fetch for header injection
+ * const proxyClient = createHalapiClient(configProvider, {
+ *   customFetch: (input, init) => {
+ *     const headers = new Headers(init?.headers)
+ *     headers.set('X-Token-Hash', 'abc123')
+ *     return fetch(input, { ...init, headers })
+ *   }
+ * })
  * ```
  */
-export function createHalapiClient(getConfig: ConfigProvider) {
+export function createHalapiClient(getConfig: ConfigProvider, options: HalapiClientOptions = {}) {
+  const fetchFn = options.customFetch ?? fetch
   async function resolveConfig(): Promise<HalapiConfig> {
     const config = await getConfig()
     if (!isConfigValid(config)) {
@@ -150,7 +183,7 @@ export function createHalapiClient(getConfig: ConfigProvider) {
     const headers = getAuthHeaders(config)
     const url = getApiUrl(config, '/api/halap/chat/stream')
 
-    const response = await fetch(url, {
+    const response = await fetchFn(url, {
       method: 'POST',
       headers: {
         ...headers,
@@ -225,7 +258,7 @@ export function createHalapiClient(getConfig: ConfigProvider) {
       params.set('externalUserId', externalUserId)
     }
 
-    const response = await fetch(getApiUrl(config, `/api/halap/conversations?${params}`), {
+    const response = await fetchFn(getApiUrl(config, `/api/halap/conversations?${params}`), {
       headers,
     })
 
@@ -246,7 +279,7 @@ export function createHalapiClient(getConfig: ConfigProvider) {
     const config = await resolveConfig()
     const headers = getAuthHeaders(config)
 
-    const response = await fetch(getApiUrl(config, `/api/halap/conversations/${conversationId}`), {
+    const response = await fetchFn(getApiUrl(config, `/api/halap/conversations/${conversationId}`), {
       headers,
     })
 
@@ -267,7 +300,7 @@ export function createHalapiClient(getConfig: ConfigProvider) {
     const config = await resolveConfig()
     const headers = getAuthHeaders(config)
 
-    const response = await fetch(getApiUrl(config, `/api/halap/artifacts/books/${messageId}`), {
+    const response = await fetchFn(getApiUrl(config, `/api/halap/artifacts/books/${messageId}`), {
       headers,
     })
 
@@ -288,7 +321,7 @@ export function createHalapiClient(getConfig: ConfigProvider) {
     const config = await resolveConfig()
     const headers = getAuthHeaders(config)
 
-    const response = await fetch(getApiUrl(config, `/api/halap/artifacts/music/${messageId}`), {
+    const response = await fetchFn(getApiUrl(config, `/api/halap/artifacts/music/${messageId}`), {
       headers,
     })
 

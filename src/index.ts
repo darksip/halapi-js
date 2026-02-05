@@ -28,6 +28,7 @@ export {
   createHalapiClient,
   HalapiError,
   type HalapiClient,
+  type HalapiClientOptions,
   type ChatStreamOptions,
   type ChatStreamResult,
 } from './client'
