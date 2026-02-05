@@ -281,7 +281,12 @@ export function createHalapiClient(getConfig: ConfigProvider, options: HalapiCli
       }
     }
 
-    return JSON.parse(text) as ConversationsListResponse
+    try {
+      return JSON.parse(text) as ConversationsListResponse
+    } catch (parseError) {
+      console.error('Failed to parse conversations response:', text.substring(0, 200))
+      throw new Error(`Invalid JSON response from API: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`)
+    }
   }
 
   /**
@@ -302,7 +307,13 @@ export function createHalapiClient(getConfig: ConfigProvider, options: HalapiCli
       await handleErrorResponse(response, 'Failed to fetch conversation')
     }
 
-    return response.json() as Promise<ConversationDetailResponse>
+    const text = await response.text()
+    try {
+      return JSON.parse(text) as ConversationDetailResponse
+    } catch (parseError) {
+      console.error('Failed to parse conversation response:', text.substring(0, 200))
+      throw new Error(`Invalid JSON response from API: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`)
+    }
   }
 
   /**
