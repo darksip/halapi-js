@@ -266,7 +266,22 @@ export function createHalapiClient(getConfig: ConfigProvider, options: HalapiCli
       await handleErrorResponse(response, 'Failed to fetch conversations')
     }
 
-    return response.json() as Promise<ConversationsListResponse>
+    // Handle empty response (no conversations yet)
+    const text = await response.text()
+    if (!text || text.trim() === '') {
+      return {
+        success: true,
+        conversations: [],
+        metadata: {
+          requestId: '',
+          timestamp: new Date().toISOString(),
+          count: 0,
+          hasMore: false,
+        },
+      }
+    }
+
+    return JSON.parse(text) as ConversationsListResponse
   }
 
   /**
