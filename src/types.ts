@@ -13,14 +13,25 @@
  * Book recommendation
  */
 export interface Book {
+  id: string
   title: string
   author: string
-  isbn?: string
-  isbn13?: string
-  year?: number
-  coverUrl?: string
+  authors: string[]
+  isbn: string
+  isbn13: string
+  publisher?: string
+  publishedDate?: string
   description?: string
-  subjects?: string[]
+  coverUrl?: string
+  pageCount?: string
+  collection?: string
+  genre?: string
+  source?: string
+  metadata?: {
+    genreCode: number
+    language: string
+    confidence: number
+  }
 }
 
 /**
